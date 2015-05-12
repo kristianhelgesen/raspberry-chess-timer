@@ -5,10 +5,11 @@ from datetime import timedelta
 
 
 class TimerThread(threading.Thread):
-    def __init__(self, duration, tickCallback, gameOverCallback):
+    def __init__(self, duration, incrementFunction, tickCallback, gameOverCallback):
         threading.Thread.__init__(self)
         self.remaining = duration
 
+        self.incrementFunction = incrementFunction
         self.tickCallback = tickCallback
         self.gameOverCallback = gameOverCallback
 
@@ -61,6 +62,7 @@ class TimerThread(threading.Thread):
 
     def resume(self):
         with self.state:
+            self.incrementFunction();
             self.paused = False
             self.state.notify()  # unblock self if waiting
 

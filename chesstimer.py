@@ -41,30 +41,107 @@ for f in possible_fonts:
 
 CLOCK_FONT_SIZE = 40
 DATE_FONT_SIZE  = 30
-
 MAX_START = 0xffff
-DATEFORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
+class ChessTimer:
+    def __init__(self):
+        self.isPlaying = True
+        self.isInitialized = False
+        self.gameduration = timedelta(seconds=14)
+        self.incrementFunction = self.incrementFunctionNone
 
-def timer_worker(a, b):
-    remaining = a
 
-    print('timer worker')
-    print(a)
+    def tickCallbackWhite(self,remaining):
+        print 'white '+remaining
 
 
-def tickCallback(remaining):
-    print remaining
+    def tickCallbackBlack(self,remaining):
+        print 'black '+remaining
 
-def gameOverWhite():
-    print 'gameover for white'
+
+    def gameOverWhite(self):
+        print 'black wins!'
+        self.isPlaying = False
+
+
+    def gameOverBlack(self):
+        print 'white wins!'
+        self.isPlaying = False
+
+
+    def incrementFunctionNone(self):
+        return
+
+    def newWhiteTimer(self):
+        return TimerThread(self.gameduration, self.incrementFunction, self.tickCallbackWhite, self.gameOverWhite)
+
+    def newBlackTimer(self):
+        return TimerThread(self.gameduration, self.incrementFunction, self.tickCallbackBlack, self.gameOverBlack)
+
+    def onButton1(self):
+        if self.isPlaying:
+            if not self.isInitialized:
+                self.player1Timer = self.newWhiteTimer()
+                self.player2Timer = self.newBlackTimer()
+                self.player1Timer.start()
+                self.player2Timer.start()
+                self.isInitialized = True
+            self.player1Timer.resume()
+
+
+    def offButton1(self):
+        if self.isPlaying:
+            self.player1Timer.pause()
+
+
+    def onButton2(self):
+        if self.isPlaying:
+            if not self.isInitialized:
+                self.player1Timer = self.newBlackTimer()
+                self.player2Timer = self.newWhiteTimer()
+                self.player1Timer.start()
+                self.player2Timer.start()
+                self.isInitialized = True
+            self.player2Timer.resume()
+
+
+    def offButton2(self):
+        if self.isPlaying:
+            self.player2Timer.pause()
+
+
 
 
 def main():
-    print('1')
 
-    whiteTimer = TimerThread(timedelta(seconds=4), tickCallback, gameOverWhite)
+    chessTimer = ChessTimer()
+    chessTimer.onButton1()
+    time.sleep(3)
+    chessTimer.offButton1()
+
+    chessTimer.onButton2()
+    time.sleep(4)
+    chessTimer.offButton2()
+
+    chessTimer.onButton1()
+    time.sleep(3)
+    chessTimer.offButton1()
+
+    chessTimer.onButton2()
+    time.sleep(4)
+    chessTimer.offButton2()
+
+    exit()
+
+
+
+
+
+def timertest():
+    gameduration = timedelta(seconds=14)
+
+    whiteTimer = TimerThread(gameduration, incrementFunction, tickCallbackWhite, gameOverWhite)
     whiteTimer.start()
 
     time.sleep(3.1)
