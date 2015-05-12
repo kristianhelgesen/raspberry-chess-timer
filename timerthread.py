@@ -15,11 +15,12 @@ class TimerThread(threading.Thread):
 
         self.daemon = True
         self.paused = True
+        self.running = True
         self.state = threading.Condition()
 
     def run(self):
         remainingStr = ''
-        while True:
+        while self.running:
             with self.state:
                 if self.paused:
                     self.state.wait() # block until notified
@@ -35,7 +36,7 @@ class TimerThread(threading.Thread):
 
             hours, remainder = divmod(self.remaining.seconds, 3600)
             minutes, seconds = divmod(remainder, 60)
-#            remainingStr1 = '%d:%2d:%2d' % (hours, minutes, seconds)
+
             if hours > 0:
                 remainingStr1 = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
             else:
@@ -43,7 +44,6 @@ class TimerThread(threading.Thread):
 
 
             if remainingStr!=remainingStr1:
-                # update screen
                 remainingStr = remainingStr1
                 self.tickCallback(remainingStr)
 
@@ -52,10 +52,6 @@ class TimerThread(threading.Thread):
                 self.gameOverCallback()
                 break
 
-            # if pause is called when sleeping
-            with self.state:
-                if self.paused:
-                    continue
 
 
 
@@ -69,5 +65,11 @@ class TimerThread(threading.Thread):
     def pause(self):
         with self.state:
             self.paused = True  # make self block and wait
+            self.state.notify()  # unblock self if waiting
+
+    def stop(self):
+        self.running = False
+        self.paused = False
+        with self.state:
             self.state.notify()  # unblock self if waiting
 
