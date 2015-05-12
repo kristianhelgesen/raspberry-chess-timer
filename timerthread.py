@@ -1,3 +1,4 @@
+import math
 import time
 import threading
 from datetime import datetime
@@ -19,7 +20,7 @@ class TimerThread(threading.Thread):
         self.state = threading.Condition()
 
     def run(self):
-        remainingStr = ''
+        lastSec = 0
         while self.running:
             with self.state:
                 if self.paused:
@@ -38,14 +39,14 @@ class TimerThread(threading.Thread):
             minutes, seconds = divmod(remainder, 60)
 
             if hours > 0:
-                remainingStr1 = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
+                remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
             else:
-                remainingStr1 = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+                remainingStr = "{:0>2d}:{:0>2d}".format(minutes, seconds)
 
-
-            if remainingStr!=remainingStr1:
-                remainingStr = remainingStr1
-                self.tickCallback(remainingStr)
+            sec = math.floor(seconds)
+            if lastSec!=sec:
+                lastSec = sec
+                self.tickCallback(sec,remainingStr)
 
 
             if self.remaining < timedelta(seconds=0):
