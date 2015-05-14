@@ -19,13 +19,14 @@ class TimerThread(threading.Thread):
         self.running = True
         self.state = threading.Condition()
 
+        self.lastSec = 0
+        self.printTime()
+
     def run(self):
-        lastSec = 0
         while self.running:
             with self.state:
                 if self.paused:
                     self.state.wait() # block until notified
-
 
             # sleeping and recording lenght of pause. (this can be interrupted)
             before = datetime.now()
@@ -34,26 +35,25 @@ class TimerThread(threading.Thread):
             slept = datetime.now() - before
             self.remaining -= slept
 
-
-            hours, remainder = divmod(self.remaining.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
-
-            if hours > 0:
-                remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
-            else:
-                remainingStr = "{:0>2d}:{:0>2d}".format(minutes, seconds)
-
-            sec = math.floor(seconds)
-            if lastSec!=sec:
-                lastSec = sec
-                self.tickCallback(sec,remainingStr)
-
+            self.printTime()
 
             if self.remaining < timedelta(seconds=0):
                 self.gameOverCallback()
                 break
 
+    def printTime(self):
+        hours, remainder = divmod(self.remaining.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
 
+        if hours > 0:
+            remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
+        else:
+            remainingStr = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+
+        sec = math.floor(seconds)
+        if self.lastSec!=sec:
+            self.lastSec = sec
+            self.tickCallback(sec,remainingStr)
 
 
 

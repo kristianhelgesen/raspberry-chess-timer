@@ -38,6 +38,23 @@ draw = ImageDraw.Draw(image)
 width, height = image.size 
 
 
+games = [
+    {
+        'name':'Fischer',
+        'duration':timedelta(seconds=600),
+    },
+    {
+        'name':'Bronstein',
+        'duration':timedelta(seconds=600),
+    },
+    {
+        'name':'Simple delay',
+        'duration':timedelta(seconds=600),
+    },
+]
+
+# games[0]['name']
+
 class ChessTimer:
     def __init__(self):
 
@@ -53,6 +70,7 @@ class ChessTimer:
         if sec%5==0:
             threading.Thread(target=self.tickCallbackWhiteAsync,args=(sec,remainingStr)).start()
 
+
     def tickCallbackWhiteAsync(self,sec,remainingStr):
         draw.rectangle((0,0, width - 5, height/2), fill=WHITE, outline=WHITE)
         draw.rectangle((0,height/2, 60, height), fill=BLACK, outline=BLACK)
@@ -67,6 +85,7 @@ class ChessTimer:
         if sec%5==0:
             threading.Thread(target=self.tickCallbackBlackAsync,args=(sec,remainingStr)).start()
 
+
     def tickCallbackBlackAsync(self,sec,remainingStr):
         draw.rectangle((0,height/2, width, height), fill=BLACK, outline=BLACK)
         draw.rectangle((0,0, 60, height/2), fill=WHITE, outline=WHITE)
@@ -74,6 +93,15 @@ class ChessTimer:
         draw.text((90-5*len(remainingStr),95), remainingStr, font=textfont,fill=WHITE)
         epd.display(image)
         epd.partial_update()
+
+
+    def formatTime(remaining):
+
+        if hours > 0:
+            remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
+        else:
+            remainingStr = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+        return remainingStr
 
 
     def gameOverWhite(self):
@@ -100,8 +128,8 @@ class ChessTimer:
             if not self.isInitialized:
                 self.player1Timer = self.newWhiteTimer()
                 self.player2Timer = self.newBlackTimer()
-                self.player1Timer.start()
                 self.player2Timer.start()
+                self.player1Timer.start()
                 self.isInitialized = True
             self.player1Timer.resume()
 
