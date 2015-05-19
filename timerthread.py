@@ -14,13 +14,15 @@ class TimerThread(threading.Thread):
         self.tickCallback = tickCallback
         self.gameOverCallback = gameOverCallback
 
+
         self.daemon = True
         self.paused = True
         self.running = True
         self.state = threading.Condition()
 
         self.lastSec = 0
-        self.printTime()
+        self.tick()
+
 
     def run(self):
         while self.running:
@@ -35,26 +37,34 @@ class TimerThread(threading.Thread):
             slept = datetime.now() - before
             self.remaining -= slept
 
-            self.printTime()
+            self.tick()
 
             if self.remaining < timedelta(seconds=0):
                 self.gameOverCallback()
                 break
 
-    def printTime(self):
+
+    def tick(self):
+        rem = self.remainingTime()
         hours, remainder = divmod(self.remaining.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
+        sec = int(math.floor(seconds))
 
-        if hours > 0:
-            remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
-        else:
-            remainingStr = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+        if self.lastSec != rem['seconds']:
+            self.lastSec = rem['seconds']
+            self.tickCallback(rem)
 
-        sec = math.floor(seconds)
-        if self.lastSec!=sec:
-            self.lastSec = sec
-            self.tickCallback(sec,remainingStr)
 
+    def remainingTime(self):
+        hours, remainder = divmod(self.remaining.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        sec = int(math.floor(seconds))
+
+        return {
+                'hours' : hours,
+                'minutes' : minutes,
+                'seconds' : sec
+                }
 
 
     def resume(self):

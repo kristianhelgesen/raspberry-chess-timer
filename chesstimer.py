@@ -6,9 +6,9 @@ import sys
 import os
 import Image
 import xml.etree.ElementTree as ET
-import ImageDraw
-import Image
-import ImageFont
+#import ImageDraw
+#import Image
+#import ImageFont
 
 import time
 import threading
@@ -16,7 +16,7 @@ from datetime import datetime
 from datetime import timedelta
 
 
-from EPD import EPD
+# from EPD import EPD
 from timerthread import TimerThread
 
 
@@ -24,18 +24,18 @@ COLW = 64
 WHITE = 1
 BLACK = 0
 
-textfont = ImageFont.truetype('fonts/LiberationSans-Regular.ttf', 60)
-chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 45)
+# textfont = ImageFont.truetype('fonts/LiberationSans-Regular.ttf', 60)
+# chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 45)
 
 
 CLOCK_FONT_SIZE = 40
 DATE_FONT_SIZE  = 30
 MAX_START = 0xffff
 
-epd = EPD()
-image = Image.new('1', epd.size, WHITE)
-draw = ImageDraw.Draw(image)
-width, height = image.size 
+#epd = EPD()
+#image = Image.new('1', epd.size, WHITE)
+#draw = ImageDraw.Draw(image)
+#width, height = image.size 
 
 
 games = [
@@ -55,6 +55,11 @@ games = [
 
 # games[0]['name']
 
+
+
+
+
+
 class ChessTimer:
     def __init__(self):
 
@@ -65,13 +70,14 @@ class ChessTimer:
 
 
 
-    def tickCallbackWhite(self,sec,remainingStr):
-        print 'white '+remainingStr
-        if sec%5==0:
-            threading.Thread(target=self.tickCallbackWhiteAsync,args=(sec,remainingStr)).start()
+    def tickCallbackWhite(self,remaining):
+        if remaining['seconds']%5==0:
+            remainingStr = self.formatTime(remaining)
+            print 'white '+remainingStr
+#            threading.Thread(target=self.writeRemainigWhite,args=(remainingStr)).start()
 
 
-    def tickCallbackWhiteAsync(self,sec,remainingStr):
+    def writeRemainigWhite(self,remainingStr):
         draw.rectangle((0,0, width - 5, height/2), fill=WHITE, outline=WHITE)
         draw.rectangle((0,height/2, 60, height), fill=BLACK, outline=BLACK)
         draw.text((5,25), "q", font=chessfont)
@@ -80,13 +86,14 @@ class ChessTimer:
         epd.partial_update()
 
 
-    def tickCallbackBlack(self,sec,remainingStr):
-        print 'black '+remainingStr
-        if sec%5==0:
-            threading.Thread(target=self.tickCallbackBlackAsync,args=(sec,remainingStr)).start()
+    def tickCallbackBlack(self,remaining):
+        if remaining['seconds']%5==0:
+            remainingStr = self.formatTime(remaining)
+            print 'black '+remainingStr
+#            threading.Thread(target=self.writeRemainigBlack,args=(remainingStr)).start()
 
 
-    def tickCallbackBlackAsync(self,sec,remainingStr):
+    def writeRemainigBlack(self,remainingStr):
         draw.rectangle((0,height/2, width, height), fill=BLACK, outline=BLACK)
         draw.rectangle((0,0, 60, height/2), fill=WHITE, outline=WHITE)
         draw.text((5,105), "q", font=chessfont, fill=WHITE)
@@ -95,7 +102,10 @@ class ChessTimer:
         epd.partial_update()
 
 
-    def formatTime(remaining):
+    def formatTime(self,remaining):
+        hours = remaining['hours']
+        minutes = remaining['minutes']
+        seconds = remaining['seconds']
 
         if hours > 0:
             remainingStr = "{:.0f}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
@@ -137,6 +147,8 @@ class ChessTimer:
     def offButton1(self):
         if self.isPlaying:
             self.player1Timer.pause()
+            remaining = self.player1Timer.remainingTime()
+            remainingStr = self.formatTime(remaining)
 
 
     def onButton2(self):
@@ -161,23 +173,23 @@ class ChessTimer:
 class Display:
 
     def __init__(self):
-        self.textfont = ImageFont.truetype('fonts/LiberationSans-Regular.ttf', 40)
-        self.chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 40)
+        self.textfont = ImageFont.truetype('fonts/LiberationSans-Regular.ttf', 60)
+        self.chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 45)
 
 
 
 
 def main():
 
-    draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
+#    draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
     
-    chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 100)
+#    chessfont = ImageFont.truetype('fonts/CASEFONT.TTF', 100)
     
 #    draw.text((5,5), "q", font=chessfont)
 
-    epd.clear()
-    epd.display(image)
-    epd.update()
+#    epd.clear()
+#    epd.display(image)
+#    epd.update()
 
 
 
