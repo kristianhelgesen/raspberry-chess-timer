@@ -71,7 +71,7 @@ class ChessTimer:
 
 
     def tickCallbackWhite(self,remaining):
-        if remaining['seconds']%5==0:
+        if remaining['seconds']%5==0 or remaining['forceUpdate']:
             remainingStr = self.formatTime(remaining)
             print 'white '+remainingStr
 #            threading.Thread(target=self.writeRemainigWhite,args=(remainingStr)).start()
@@ -87,7 +87,7 @@ class ChessTimer:
 
 
     def tickCallbackBlack(self,remaining):
-        if remaining['seconds']%5==0:
+        if remaining['seconds']%5==0 or remaining['forceUpdate']:
             remainingStr = self.formatTime(remaining)
             print 'black '+remainingStr
 #            threading.Thread(target=self.writeRemainigBlack,args=(remainingStr)).start()
@@ -148,8 +148,8 @@ class ChessTimer:
         if self.isPlaying:
             self.player1Timer.pause()
             remaining = self.player1Timer.remainingTime()
-            remainingStr = self.formatTime(remaining)
-
+            remaining['forceUpdate'] = true
+            self.player1Timer.tickCallback(remaining)
 
     def onButton2(self):
         if self.isPlaying:
@@ -165,6 +165,9 @@ class ChessTimer:
     def offButton2(self):
         if self.isPlaying:
             self.player2Timer.pause()
+            remaining = self.player2Timer.remainingTime()
+            remaining['forceUpdate'] = true
+            self.player2Timer.tickCallback(remaining)
 
 
 
@@ -199,7 +202,7 @@ def main():
     chessTimer.offButton1()
 
     chessTimer.onButton2()
-    time.sleep(30)
+    time.sleep(31)
     chessTimer.offButton2()
 
     chessTimer.onButton1()
