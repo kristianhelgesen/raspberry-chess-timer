@@ -1,2 +1,2 @@
-scp *.py pi@192.168.1.111:chess
-ssh pi@192.168.1.111 'cd chess; python chesstimer.py'
+scp *.py pi@192.168.1.110:chess
+ssh pi@192.168.1.110 'cd chess; sudo python chesstimer.py'
